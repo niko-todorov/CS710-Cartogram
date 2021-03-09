@@ -5,7 +5,7 @@ library(dplyr)
 library(tidyr)
 
 
-world_happiness <- read.csv(file = 'data/2019.csv')
+world_happiness <- read.csv(file = 'archive/2019.csv')
 world_happiness$Country.or.region[world_happiness$Country.or.region=="United States"] <- "USA"
 world_happiness$Country.or.region[world_happiness$Country.or.region=="United Kingdom"] <- "UK"
 countries<-map_data("world")
@@ -18,15 +18,15 @@ ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
   geom_polygon()
 
 #POINT
-latitude<-happiness_map %>% drop_na()
-latitude$lat_cat<-factor(cut(latitude$lat,seq(-50,70,1)))
-lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(Score))
+latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(lat)) %>% drop_na()
+latitude$lat_cat<-factor(cut(latitude$lat,seq(-60,70,1)))
+lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score))
 ggplot(lat_group,aes(x=lat_cat,y=score,color=score)) +
   geom_point()
 
 #BAR
-latitude$lat_cat<-factor(cut(latitude$lat,seq(-50,70,5)))
-lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(Score),count=n())
+latitude$lat_cat<-factor(cut(latitude$lat,seq(-60,70,10)))
+lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),count=n())
 ggplot(lat_group,aes(x=lat_cat,fill=score)) +
   geom_bar()
 
