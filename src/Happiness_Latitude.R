@@ -4,8 +4,8 @@ library(mapproj)
 library(dplyr)
 library(tidyr)
 
-#setwd("/Users/tobychappell/Documents/CS_Courses/CS_710/Workshop1Group3")
-world_happiness <- read.csv(file = 'data/2019.csv')
+
+world_happiness <- read.csv(file = '../data/2019.csv')
 
 world_happiness$Country.or.region[world_happiness$Country.or.region=="United States"] <- "USA"
 world_happiness$Country.or.region[world_happiness$Country.or.region=="United Kingdom"] <- "UK"

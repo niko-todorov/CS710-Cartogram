@@ -9,3 +9,5 @@
 ## World Cup Results
 
 # Instructions
+1. Open R Project
+2. source(src/main)
