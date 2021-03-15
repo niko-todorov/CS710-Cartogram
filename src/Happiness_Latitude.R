@@ -3,7 +3,6 @@ library(maps)
 library(mapproj)
 library(dplyr)
 library(tidyr)
-library(gridExtra)
 
 #Read in combined happiness data (2015-2019)
 world_happiness <- read.csv(file = '../data/happinessdata.csv')
@@ -24,10 +23,10 @@ happiness_map<-arrange(happiness_map,group,order)
 
 #MAP
 #Happiness by country map
-map_plot<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) + 
+p1<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) + 
   coord_quickmap() +
   geom_polygon() + 
-  ggtitle("Happiness by Country (2015-2019)") +
+  ggtitle("Happiness by Country") +
   labs(fill="Happiness Score") +
   theme_void() + 
   scale_fill_viridis_c(option="cividis")
@@ -36,7 +35,7 @@ map_plot<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
 #Get average absolute value of latitude (distance from equator) for each country with the average happiness score
 latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat))) %>% drop_na()
 
-#Score versus distance from equator (not used)
+#Score versus distance from equator 
 ggplot(latitude,aes(x=lat,y=score,color=score)) +
   geom_point() + 
   ggtitle("Happiness Score vs Distance from Equator") +
@@ -52,16 +51,16 @@ latitude$lat_cat<-factor(cut(latitude$lat,breaks=seq(0,70,5),labels=seq(0,65,5))
 lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),count=n())
 
 #Score versus distance from equator 
-bar_plot<-ggplot(lat_group,aes(x=lat_cat,y=score,fill=count)) +
+p2<-ggplot(lat_group,aes(x=lat_cat,y=score,fill=count)) +
   geom_bar(stat="identity") +
   ggtitle("Happiness vs Distance from Equator") +
   xlab(label="Distance from Equator by Latitude") +
   ylab(label="Happiness Score") +
   labs(fill="Number of Countries") +
-  theme_classic() + 
-  scale_fill_gradient(low = "grey25", high = " light blue")
+  theme_classic() +
+  scale_fill_viridis_c()
 
-#Count versus distance from equator colored by score (not used)
+#Count versus distance from equator colored by score
 ggplot(lat_group,aes(x=lat_cat,y=count,fill=score)) +
   geom_bar(stat="identity") + 
   ggtitle("Number of Countries vs Distance from Equator") +
@@ -71,4 +70,6 @@ ggplot(lat_group,aes(x=lat_cat,y=count,fill=score)) +
   theme_classic() +
   scale_fill_viridis_c(option="cividis")
 
-grid.arrange(map_plot, bar_plot, nrow = 2)
+library(gridExtra)
+grid.arrange(p1, p2, nrow = 2)
+
