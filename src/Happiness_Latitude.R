@@ -84,6 +84,7 @@ box_plot <- ggplot(latitude,aes(x=lat_cat,y=score,fill=mean_score)) +
   ylab(label="Happiness Score") +
   labs(fill="Average Happiness Score") +
   theme_classic() + 
-  scale_fill_gradient(low = "dodgerblue4", high = "cadetblue1")
+  scale_fill_viridis_c(option="magma") 
+  #scale_fill_gradient(low = "dodgerblue4", high = "cadetblue1")
 
 grid.arrange(map_plot, box_plot, nrow=2)
