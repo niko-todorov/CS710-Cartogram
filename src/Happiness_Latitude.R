@@ -20,20 +20,21 @@ ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
   scale_fill_viridis_c()
 
 #POINT
-latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(lat)) %>% drop_na()
-latitude$lat_cat<-factor(cut(latitude$lat,seq(-60,70,1)))
-lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score))
-ggplot(lat_group,aes(x=lat_cat,y=score,color=score)) +
+latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat))) %>% drop_na()
+ggplot(latitude,aes(x=lat,y=score,color=score)) +
   geom_point() + 
   scale_color_viridis_c()
 
 #BAR
-latitude$lat_cat<-factor(cut(latitude$lat,seq(-60,70,10)))
+latitude$lat_cat<-factor(cut(latitude$lat,seq(0,70,5)))
 lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),count=n())
-ggplot(lat_group,aes(x=lat_cat,fill=score)) +
-  geom_bar() + 
+
+#Score versus distance from equator versus 
+ggplot(lat_group,aes(x=lat_cat,y=score,fill=score)) +
+  geom_bar(stat="identity") + 
   scale_fill_viridis_c()
 
+#Count versus distance from equator colored by score
 ggplot(lat_group,aes(x=lat_cat,y=count,fill=score)) +
   geom_bar(stat="identity") + 
   scale_fill_viridis_c()
