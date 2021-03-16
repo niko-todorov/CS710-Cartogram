@@ -17,7 +17,6 @@ world_population$X2015_2019 <- (world_population$X2015+world_population$X2016+wo
 world_population <- world_population %>% select(Country.Name,X2015_2019)
 world_happiness<-merge(world_population,world_happiness,by.x="Country.Name",by.y="Country")
 
-
 #Edit specific labels to merge with countries data set
 world_happiness$Country[world_happiness$Country=="United States"] <- "USA"
 world_happiness$Country[world_happiness$Country=="United Kingdom"] <- "UK"
@@ -51,9 +50,22 @@ ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=log10(Population))) +
   theme_void() + 
   scale_fill_viridis_c()
 
+#Happiness by country map, brightness by population
+happiness_map$Population[is.na(happiness_map$Population)] <- 100000
+happiness_map$pop_cat<-factor(cut(1/log10(happiness_map$Population),breaks=seq(0,1,.02)),labels=c("Large","","Medium"," ","Small"))
+ggplot(happiness_map) +
+  coord_quickmap() +
+  geom_polygon(aes(x=long, y=lat, group=group, fill=Score)) +
+  geom_polygon(aes(x=long, y=lat, group=group, alpha=pop_cat)) +
+  ggtitle("Happiness by Country (2015-2019)") +
+  labs(fill="Happiness Score",alpha="Population") +
+  theme_void() + 
+  scale_fill_viridis_c() +
+  scale_alpha_manual(values = c(0, 0.25, 0.5, 0.75, 1))
+
 #POINT
 #Get average absolute value of latitude (distance from equator) for each country with the average happiness score
-latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat))) %>% drop_na()
+latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat)),pop=mean(Population)) %>% drop_na()
 
 #Score versus distance from equator (not used)
 ggplot(latitude,aes(x=lat,y=score,color=score)) +
@@ -68,7 +80,7 @@ ggplot(latitude,aes(x=lat,y=score,color=score)) +
 #BAR
 #Factorize latitude into discrete categories
 latitude$lat_cat<-factor(cut(latitude$lat,breaks=seq(0,70,5),labels=seq(0,65,5)))
-lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),count=n())
+lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),pop=mean(pop),count=n())
 
 #Score versus distance from equator 
 bar_plot<-ggplot(lat_group,aes(x=lat_cat,y=score,fill=count)) +
