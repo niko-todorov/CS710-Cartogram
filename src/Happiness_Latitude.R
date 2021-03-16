@@ -10,6 +10,8 @@ world_happiness <- read.csv(file = '../data/happinessdata.csv')
 
 #Read in population data
 world_population <- read.csv(file='../data/Population.csv')
+world_happiness$Country[world_happiness$Country=="Congo (Brazzaville)"] <- "Republic of Congo"
+world_happiness$Country[world_happiness$Country=="Congo (Kinshasa)"] <- "Democratic Republic of the Congo"
 
 world_population$X2015_2019 <- (world_population$X2015+world_population$X2016+world_population$X2017+world_population$X2018+world_population$X2019)/5
 world_population <- world_population %>% select(Country.Name,X2015_2019)
