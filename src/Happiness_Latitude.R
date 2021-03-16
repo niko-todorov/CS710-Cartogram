@@ -8,12 +8,20 @@ library(gridExtra)
 #Read in combined happiness data (2015-2019)
 world_happiness <- read.csv(file = '../data/happinessdata.csv')
 
+#Read in population data
+world_population <- read.csv(file='../data/Population.csv')
+
+world_population$X2015_2019 <- (world_population$X2015+world_population$X2016+world_population$X2017+world_population$X2018+world_population$X2019)/5
+world_population <- world_population %>% select(Country.Name,X2015_2019)
+world_happiness<-merge(world_population,world_happiness,by.x="Country.Name",by.y="Country")
+
+
 #Edit specific labels to merge with countries data set
 world_happiness$Country[world_happiness$Country=="United States"] <- "USA"
 world_happiness$Country[world_happiness$Country=="United Kingdom"] <- "UK"
 
 #Set happiness score of each country to mean of that country over all years
-world_happiness<-world_happiness %>% group_by(Country) %>% summarise(Score=mean(HappinessScore)) %>% drop_na()
+world_happiness<-world_happiness %>% group_by(Country) %>% summarise(Score=mean(HappinessScore),Population=mean(X2015_2019)) %>% drop_na()
 
 #Read in country data
 countries<-map_data("world")
@@ -31,6 +39,15 @@ map_plot<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
   labs(fill="Happiness Score") +
   theme_void() + 
   scale_fill_viridis_c(option="magma")
+
+#Population by country map
+ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=log10(Population))) + 
+  coord_quickmap() +
+  geom_polygon() + 
+  ggtitle("Population by Country (2015-2019)") +
+  labs(fill="Population") +
+  theme_void() + 
+  scale_fill_viridis_c()
 
 #POINT
 #Get average absolute value of latitude (distance from equator) for each country with the average happiness score
