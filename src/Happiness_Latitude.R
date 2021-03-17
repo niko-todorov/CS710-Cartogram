@@ -6,7 +6,7 @@ library(tidyr)
 library(gridExtra)
 
 #Read in combined happiness data (2015-2019)
-world_happiness <- read.csv(file = 'data/happinessdata.csv')
+world_happiness <- read.csv(file = '../data/happinessdata.csv')
 
 #Read in population data
 world_population <- read.csv(file='../data/Population.csv')
