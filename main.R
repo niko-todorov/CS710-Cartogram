@@ -20,6 +20,7 @@ ggplot(happiness,aes(x=Economy,y=HappinessScore,color=Year))+
   scale_color_gradient2(midpoint=mid,low="blue",mid="white",
                         high="red",space="Lab")
 
-ggplot(happiness,aes(x=Economy,y=HappinessScore,color=Region))+
-  geom_point() +
-  geom_encircle()
+ggplot(data <- happiness, mapping <- aes(x<-Health, y<-as.factor(Region), color<-mean(Region), fill<-mean(Region))) + geom_violin(trim=TRUE) # geom_boxplot(width=0.1) # geom_point() # geom_contour
+#ggplot(happiness,aes(x=Economy,y=HappinessScore,color=Region))+geom_point() + geom_encircle()
+
+

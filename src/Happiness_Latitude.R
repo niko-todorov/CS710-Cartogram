@@ -6,7 +6,7 @@ library(tidyr)
 library(gridExtra)
 
 #Read in combined happiness data (2015-2019)
-world_happiness <- read.csv(file = '../data/happinessdata.csv')
+world_happiness <- read.csv(file = 'data/happinessdata.csv')
 
 #Edit specific labels to merge with countries data set
 world_happiness$Country[world_happiness$Country=="United States"] <- "USA"
