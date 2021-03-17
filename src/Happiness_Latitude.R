@@ -6,23 +6,14 @@ library(tidyr)
 library(gridExtra)
 
 #Read in combined happiness data (2015-2019)
-world_happiness <- read.csv(file = 'data/happinessdata.csv')
-
-#Read in population data
-world_population <- read.csv(file='data/Population.csv') # PopulationMod.csv
-world_happiness$Country[world_happiness$Country=="Congo (Brazzaville)"] <- "Republic of Congo"
-world_happiness$Country[world_happiness$Country=="Congo (Kinshasa)"] <- "Democratic Republic of the Congo"
-
-world_population$X2015_2019 <- (world_population$X2015+world_population$X2016+world_population$X2017+world_population$X2018+world_population$X2019)/5
-world_population <- world_population %>% select(Country.Name,X2015_2019)
-world_happiness<-merge(world_population,world_happiness,by.x="Country.Name",by.y="Country")
+data <- read.csv(file = 'data/pop-happiness.csv')
 
 #Edit specific labels to merge with countries data set
-world_happiness$Country[world_happiness$Country=="United States"] <- "USA"
-world_happiness$Country[world_happiness$Country=="United Kingdom"] <- "UK"
+data$Country[data$Country=="United States"] <- "USA"
+data$Country[data$Country=="United Kingdom"] <- "UK"
 
 #Set happiness score of each country to mean of that country over all years
-world_happiness<-world_happiness %>% group_by(Country) %>% summarise(Score=mean(HappinessScore),Population=mean(X2015_2019)) %>% drop_na()
+world_happiness<-data %>% group_by(Country,Region) %>% summarise(Score=mean(HappinessScore),Population=mean(Population))
 
 #Read in country data
 countries<-map_data("world")
