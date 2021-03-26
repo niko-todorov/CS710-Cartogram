@@ -31,71 +31,26 @@ map_plot<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
   labs(fill="Happiness Score") +
   theme_void() + 
   scale_fill_viridis_c(option="magma")
+map_plot
 
-#Population by country map
-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=log10(Population))) + 
-  coord_quickmap() +
-  geom_polygon() + 
-  ggtitle("Population by Country (2015-2019)") +
-  labs(fill="Population") +
-  theme_void() + 
-  scale_fill_viridis_c()
-
+min_pop<-min((happiness_map %>% drop_na)$Population)
 #Happiness by country map, brightness by population
-happiness_map$Population[is.na(happiness_map$Population)] <- 100000
-happiness_map$pop_cat<-factor(cut(1/log10(happiness_map$Population),breaks=seq(0,1,.02)),labels=c("Large","","Medium"," ","Small"))
-ggplot(happiness_map) +
+happiness_map$Population[is.na(happiness_map$Population)] <- min_pop-1
+happiness_map$pop_cat<-factor(cut(1/log10(happiness_map$Population),breaks=seq(0,1,.04)),labels=c("Large","Medium","Small"))
+map_pop_plot<-ggplot(happiness_map) +
   coord_quickmap() +
   geom_polygon(aes(x=long, y=lat, group=group, fill=Score)) +
   geom_polygon(aes(x=long, y=lat, group=group, alpha=pop_cat)) +
   ggtitle("Happiness by Country (2015-2019)") +
   labs(fill="Happiness Score",alpha="Population") +
   theme_void() + 
-  scale_fill_viridis_c() +
-  scale_alpha_manual(values = c(0, 0.25, 0.5, 0.75, 1))
+  scale_fill_viridis_c(option="magma") +
+  scale_alpha_manual(values = c(0.1,0.4,.7))
 
-#POINT
 #Get average absolute value of latitude (distance from equator) for each country with the average happiness score
 latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat)),pop=mean(Population)) %>% drop_na()
-
-#Score versus distance from equator (not used)
-ggplot(latitude,aes(x=lat,y=score,color=score)) +
-  geom_point() + 
-  ggtitle("Happiness Score vs Distance from Equator") +
-  xlab(label="Distance from Equator by Latitude") +
-  ylab(label="Happiness Score") +
-  labs(color="Happiness Score") +
-  theme_bw() +
-  scale_color_viridis_c(option="cividis")
-
-#BAR
-#Factorize latitude into discrete categories
-latitude$lat_cat<-factor(cut(latitude$lat,breaks=seq(0,70,5),labels=seq(0,65,5)))
-lat_group <- latitude %>% group_by(lat_cat) %>% summarise(score=mean(score),pop=mean(pop),count=n())
-
-#Score versus distance from equator 
-bar_plot<-ggplot(lat_group,aes(x=lat_cat,y=score,fill=count)) +
-  geom_bar(stat="identity") +
-  ggtitle("Happiness vs Distance from Equator") +
-  xlab(label="Distance from Equator by Latitude") +
-  ylab(label="Happiness Score") +
-  labs(fill="Number of Countries") +
-  theme_classic() + 
-  scale_fill_gradient(low = "grey25", high = " light blue")
-
-#Count versus distance from equator colored by score (not used)
-ggplot(lat_group,aes(x=lat_cat,y=count,fill=score)) +
-  geom_bar(stat="identity") + 
-  ggtitle("Number of Countries vs Distance from Equator") +
-  xlab(label="Distance from Equator by Latitude") +
-  ylab(label="Number of Countries") +
-  labs(fill="Happiness Score") +
-  theme_classic() +
-  scale_fill_viridis_c(option="cividis")
-
-lay <- rbind(c(1,1,1,1,1,1),
-             c(NA,2,2,2,2,NA))
-grid.arrange(map_plot, bar_plot, layout_matrix=lay)
+min_score<-min(latitude$score)
+max_score<-max(latitude$score)
 
 latitude$lat_cat<-factor(cut(latitude$lat,breaks=seq(0,70,5),labels=seq(0,65,5)))
 latitude<-latitude %>% group_by(lat_cat) %>% mutate(mean_score=mean(score))
@@ -106,7 +61,24 @@ box_plot <- ggplot(latitude,aes(x=lat_cat,y=score,fill=mean_score)) +
   ylab(label="Happiness Score") +
   labs(fill="Average Happiness Score") +
   theme_classic() + 
-  scale_fill_viridis_c(option="magma") 
-  #scale_fill_gradient(low = "dodgerblue4", high = "cadetblue1")
-
+  scale_fill_viridis_c(option="magma",limits=c(min_score,max_score)) 
+box_plot 
 grid.arrange(map_plot, box_plot, nrow=2)
+
+latitude$pop_cat<-factor(cut(1/log10(latitude$pop),breaks=seq(0,1,.01)))
+popcat<-latitude %>% group_by(lat_cat) %>% count(lat_cat, pop_cat_max=pop_cat) %>% slice(which.max(n))
+latitude<-merge(latitude,popcat,by.x="lat_cat",by.y="lat_cat")
+
+box_pop_plot <- ggplot(latitude) +
+  geom_boxplot(aes(x=lat_cat,y=score,fill=mean_score)) +
+  geom_boxplot(aes(x=lat_cat,y=score,alpha=pop_cat_max),fill="black") +
+  ggtitle("Happiness vs Distance from Equator") +
+  xlab(label="Distance from Equator by Latitude") +
+  ylab(label="Happiness Score") +
+  labs(fill="Average Happiness Score",alpha="Average Population") +
+  theme_classic() +
+  scale_fill_viridis_c(option="magma",limits=c(min_score,max_score)) +
+  scale_alpha_manual(values = c(0.1,0.4,.7))
+box_pop_plot
+
+grid.arrange(map_pop_plot, box_pop_plot, nrow=2)
