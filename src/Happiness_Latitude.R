@@ -30,6 +30,7 @@ map_plot<-ggplot(happiness_map,aes(x=long,y=lat,group=group,fill=Score)) +
   ggtitle("Happiness by Country (2015-2019)") +
   labs(fill="Happiness Score") +
   theme_void() + 
+  theme(legend.position='none') +
   scale_fill_viridis_c(option="magma")
 map_plot
 
@@ -46,6 +47,7 @@ map_pop_plot<-ggplot(happiness_map) +
   theme_void() + 
   scale_fill_viridis_c(option="magma") +
   scale_alpha_manual(values = c(0.1,0.4,.7))
+map_pop_plot
 
 #Get average absolute value of latitude (distance from equator) for each country with the average happiness score
 latitude<-happiness_map %>% group_by(region) %>% summarise(score=mean(Score),lat=mean(abs(lat)),pop=mean(Population)) %>% drop_na()
@@ -59,8 +61,9 @@ box_plot <- ggplot(latitude,aes(x=lat_cat,y=score,fill=mean_score)) +
   ggtitle("Happiness vs Distance from Equator") +
   xlab(label="Distance from Equator by Latitude") +
   ylab(label="Happiness Score") +
-  labs(fill="Average Happiness Score") +
+  labs(fill="Happiness Score") +
   theme_classic() + 
+  theme(legend.position='bottom') +
   scale_fill_viridis_c(option="magma",limits=c(min_score,max_score)) 
 box_plot 
 grid.arrange(map_plot, box_plot, nrow=2)
