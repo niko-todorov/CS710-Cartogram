@@ -56,32 +56,36 @@ max_score<-max(latitude$score)
 
 latitude$lat_cat<-factor(cut(latitude$lat,breaks=seq(0,70,5),labels=seq(0,65,5)))
 latitude<-latitude %>% group_by(lat_cat) %>% mutate(mean_score=mean(score))
-box_plot <- ggplot(latitude,aes(x=lat_cat,y=score,fill=mean_score)) +
+box_plot <- ggplot(latitude,aes(x=score,y=lat_cat,fill=mean_score)) +
   geom_boxplot() +
   ggtitle("Happiness vs Distance from Equator") +
-  xlab(label="Distance from Equator by Latitude") +
-  ylab(label="Happiness Score") +
+  xlab(label="Happiness Score") +
+  ylab(label="Distance from Equator by Latitude") +
   labs(fill="Happiness Score") +
   theme_classic() + 
   theme(legend.position='bottom') +
   scale_fill_viridis_c(option="magma",limits=c(min_score,max_score)) 
-box_plot 
-grid.arrange(map_plot, box_plot, nrow=2)
+box_plot
+lay <- rbind(c(1,1,1,1,1),
+             c(NA,2,2,2,NA))
+grid.arrange(map_plot, box_plot, layout_matrix = lay)
 
 latitude$pop_cat<-factor(cut(1/log10(latitude$pop),breaks=seq(0,1,.01)))
 popcat<-latitude %>% group_by(lat_cat) %>% count(lat_cat, pop_cat_max=pop_cat) %>% slice(which.max(n))
 latitude<-merge(latitude,popcat,by.x="lat_cat",by.y="lat_cat")
 
 box_pop_plot <- ggplot(latitude) +
-  geom_boxplot(aes(x=lat_cat,y=score,fill=mean_score)) +
-  geom_boxplot(aes(x=lat_cat,y=score,alpha=pop_cat_max),fill="black") +
+  geom_boxplot(aes(x=score,y=lat_cat,fill=mean_score)) +
+  geom_boxplot(aes(x=score,y=lat_cat,alpha=pop_cat_max),fill="black") +
   ggtitle("Happiness vs Distance from Equator") +
-  xlab(label="Distance from Equator by Latitude") +
-  ylab(label="Happiness Score") +
-  labs(fill="Average Happiness Score",alpha="Average Population") +
+  xlab(label="Happiness Score") +
+  ylab(label="Distance from Equator by Latitude") +
+  labs(fill="Happiness Score",alpha="Population") +
   theme_classic() +
   scale_fill_viridis_c(option="magma",limits=c(min_score,max_score)) +
   scale_alpha_manual(values = c(0.1,0.4,.7))
 box_pop_plot
 
-grid.arrange(map_pop_plot, box_pop_plot, nrow=2)
+lay <- rbind(c(1,1,1,1,1),
+             c(NA,2,2,2,NA))
+grid.arrange(map_pop_plot, box_pop_plot, layout_matrix = lay)
